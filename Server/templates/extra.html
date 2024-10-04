@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask WebSocket Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        .canvas-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            
+        }
+    </style>
+</head>
+<body>
+    <div style="padding-left: 600px;">
+        <h1>Player points</h1>
+        <div id="player-points"></div>
+        <button id="reset"> Reset board</button>
+    </div>
+    <canvas id="background" class="canvas-layer" style="z-index: 1;"></canvas>
+    <canvas id="walls" class="canvas-layer" style="z-index: 0;"></canvas>
+    <canvas id="foreground" class="canvas-layer" style="z-index: 2;"></canvas>
+<script src="{{ url_for('static', filename='index.js') }}"></script>
+</body>
+</html>

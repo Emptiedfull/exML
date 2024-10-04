@@ -1,8 +1,45 @@
 var socket = io();
 
+var player = document.getElementById('player-token')
+var ghost = document.getElementById('ghost-token')
+
+var player_dock = document.getElementById('player-dock')
+var ghost_dock = document.getElementById('ghost-dock')
+
 document.addEventListener('DOMContentLoaded', function() {
     reset_button = document.getElementById('reset')
     reset_button.addEventListener('click',reset)
+
+
+
+    var part_coll = document.getElementById('part-coll')
+    var part_content = document.getElementById('part-content')
+
+    part_coll.addEventListener('click',()=>{
+
+        if (part_content.style.display === 'block'){
+            part_content.style.display = 'none'
+            part_content.style.maxHeight = 0
+         }else{
+            part_content.style.display = 'block'
+            part_content.style.maxHeight = part_content.scrollHeight + 'px'
+         }
+    })
+
+    var moves_coll = document.getElementById('moves-coll')
+    var moves_content = document.getElementById('moves-content')
+
+    moves_coll.addEventListener('click',()=>{
+        if (moves_content.style.display === 'block'){
+            moves_content.style.display = 'none'
+            moves_content.style.maxHeight = 0
+         }else{
+            moves_content.style.display = 'block'
+            moves_content.style.maxHeight = moves_content.scrollHeight + 'px'
+         }
+    })
+
+    console.log(part_coll,part_content)
 })
 socket.on('connect', function() {
             console.log('Connected to server');
@@ -13,11 +50,43 @@ socket.on('board',(board)=>{
     drawBoard(board[0]);
     show_points(board[1])
 })
+
+socket.on('player-connected',(name)=>{
+    player.innerHTML = name
+})
+socket.on('ghost-connected',(name)=>{
+    ghost.innerHTML = name
+})
+
+socket.on('playerdocked',()=>{
+    player_dock.innerHTML = 'Docked'
+})
+socket.on('ghostdocked',()=>{
+    ghost_dock.innerHTML = 'Docked'
+})
+socket.on('undock',()=>{
+    player_dock.innerHTML = ''
+    ghost_dock.innerHTML = ''
+})
+
+socket.on('token',(token)=>{
+    var player_token = token[0]
+    var ghost_token = token[1]
+    
+  
+
+    player.innerHTML = player_token
+    ghost.innerHTML = ghost_token
+    
+})
+
 socket.on('game-over',()=>{
     alert('Game Over')
     location.reload();
 
 })
+
+
 
 const show_points = (points) => {
     var point = document.getElementById('player-points')
@@ -26,6 +95,7 @@ const show_points = (points) => {
 
 const reset = () => {
     socket.emit('reset')
+    location.reload()
 
 }
 
@@ -46,7 +116,7 @@ function drawBoard(board){
     var foregroundCtx = foregroundCv.getContext('2d');
 
 
-    var CellSize = 15;
+    var CellSize = 14;
     var x = board[0].length*CellSize
     var y = board.length*CellSize
     setCanvasDimensions(x,y)
@@ -121,3 +191,9 @@ function drawCircle(ctx, x, y, radius) {
     ctx.closePath();
     ctx.fill();
 }
+
+
+
+
+
+
