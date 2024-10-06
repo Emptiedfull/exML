@@ -7,6 +7,13 @@ import os
 import random
 import string
 import time
+import argparse 
+
+player_timestamp = None
+ghost_timestamp = None
+
+player_time = 0
+ghost_time = 0
 
 def write_tokens_to_file(player_token, ghost_token, filename='tokens.txt'):
     with open(filename, 'w') as file:
@@ -40,7 +47,7 @@ player_name = None
 ghost_name = None
 
 def initialize():
-    global board, player, ghost1, ghost2, ghost3, ghost4, ghosts, player_token, ghost_token, player_connected, ghost_connected, player_name, ghost_name, player_move_docked, ghost_move_docked, positions, player, ghost1, ghost2, ghost3, ghost4, board,connected_clients
+    global board, player, ghost1, ghost2, ghost3, ghost4, ghosts, player_token, ghost_token, player_connected, ghost_connected, player_name, ghost_name, player_move_docked, ghost_move_docked, positions, player, ghost1, ghost2, ghost3, ghost4, board,connected_clients,player_timestamp,ghost_timestamp,player_time,ghost_time
 
     player_move_docked = False
     ghost_move_docked = False
@@ -52,6 +59,13 @@ def initialize():
     ghost_name = None
     board = Board()
     positions = board.get_positions()
+
+
+    player_timestamp = None
+    ghost_timestamp = None
+
+    player_time = 0
+    ghost_time = 0
 
     player = Player(positions[0])
     ghost1 = Ghost(positions[1], "a")
@@ -74,6 +88,7 @@ def initialize():
     
 
 board = Board()
+print(board.food_left())
 positions = board.get_positions()
 
 
@@ -86,11 +101,6 @@ ghost4 = Ghost(positions[4],"d")
 ghosts = [ghost1,ghost2,ghost3,ghost4]
 
 
-
-@socketio.on('hi')
-def handle_hi():
-    print('hi')
- 
 
 @socketio.on('reset')
 def reset():
@@ -147,32 +157,42 @@ def move_player(player,move):
 
 
 def handlemove(obj,move):
-    global player_move_docked,ghost_move_docked,ghost_move,player_move
+    global player_move_docked,ghost_move_docked,ghost_move,player_move,player_timestamp,ghost_timestamp,player_time,ghost_time
 
-    if obj == "player":
-        
+    if obj == "player" and not player_move_docked:
+        timeatmove = time.time()
+        player_time += timeatmove - player_timestamp
         player_move_docked = True
         player_move = move
         socketio.emit('playerdocked')
         print("player move recieved")
       
         
-    if obj == "ghost":
+    if obj == "ghost" and not ghost_move_docked:
+        timeatmove = time.time()
+        ghost_time += timeatmove - ghost_timestamp
+        print(timeatmove - ghost_timestamp)
         ghost_move_docked = True
         ghost_move = move
         socketio.emit('ghostdocked')
         print("ghost move recieved")
     
     if player_move_docked and ghost_move_docked:
-        timestamp = time.time()
+        player_timestamp,ghost_timestamp = time.time(),time.time()
         player_move_docked = False
         ghost_move_docked = False
         player_status  = move_player(player,player_move)
         status = move_ghosts(ghosts,ghost_move)
         socketio.emit('undock')
         socketio.emit('board', [board.get_board(),player.points])
-        if player_status == "death":
-            socketio.emit('game-over')
+        if player_status =="death" or status == "death":
+            socketio.emit('game-over',{'winner':'ghost','timestamps':[player_time,ghost_time]})
+            print('game over')
+        elif board.food_left() == 0:
+            socketio.emit('game-over',{'winner':'player','timestamps':[player_time,ghost_time]})
+            print('game over')
+        print(player_time,ghost_time)
+    
      
 
 
@@ -217,7 +237,6 @@ def ghost_move():
     return flask.jsonify({"status": "success"})
    
 
-
 def display():
     if player_connected:
         socketio.emit('player-connected',player_name)
@@ -229,10 +248,12 @@ def display():
         socketio.emit('ghostdocked')
 
 
+
+
 @socketio.on('connect')
 def handle_connect():
 
-    global player_connected,ghost_connected,player_name,ghost_name
+    global player_connected,ghost_connected,player_name,ghost_name,player_timestamp,ghost_timestamp
     
 
     
@@ -246,6 +267,9 @@ def handle_connect():
         display()
         print('display connected')
     else:
+        if request.headers.get('Authorization') == None:
+            print('no token')
+            raise ConnectionRefusedError('no token')
         token = request.headers.get('Authorization').split(' ')[1]
         name = request.headers.get('Name')
       
@@ -258,6 +282,7 @@ def handle_connect():
             player_name = name
             socketio.emit('player-connected',name)
             connected_clients.append(request.sid)
+            player_timestamp = time.time()
             print('player connected')
         elif token == ghost_token:
             if ghost_connected == True:
@@ -266,6 +291,7 @@ def handle_connect():
             ghost_name = name
             socketio.emit('ghost-connected',name)
             connected_clients.append(request.sid)
+            ghost_timestamp = time.time()
             print('ghost connected')
         else:
             print('invalid token')
@@ -280,9 +306,13 @@ def handle_connect():
 
 if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser(description='Run the Flask-SocketIO server.')
+    parser.add_argument('--port', type=int, default=5000, help='Port to run the server on')
+    args = parser.parse_args()
+
     extra_files = [
         os.path.join(os.getcwd(), 'static', 'index.js'),
         os.path.join(os.getcwd(), 'templates', 'index.html')
     ]
-    socketio.run(app, debug=True, extra_files=extra_files) 
+    socketio.run(app,port=args.port,debug=True, extra_files=extra_files) 
 

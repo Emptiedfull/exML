@@ -17,9 +17,9 @@ boardtypes = [
         "######.##### ## #####.######",
         "######.##          ##.######",
         "######.## ###  ### ##.######",
-        "######.## #a b   # ##.######",
-        " p ..  ## # c  d # ##       ",
-        "######.## #      # ##.######",
+        "######.## #  b   # ##.######",
+        " p. .. ## # c  d # ##       ",
+        "######.## #   a  # ##.######",
         "######.## ######## ##.######",
         "######.##          ##.######",
         "######.## ######## ##.######",
@@ -169,7 +169,8 @@ class Board:
         self.positions = self.get_positions()
         rows,cols = self.row,self.col
 
-        
+    def food_left(self):
+        return np.count_nonzero(self.board == '.')
        
     def display(self):
       return self.board
@@ -202,86 +203,4 @@ class Board:
         return self.board.tolist() 
                 
 
-    # def draw(self, screen, cell_size):
-    #     for i in range(self.row):
-    #          for j in range(self.col):
-    #             color = (0, 0, 0)  # Default color for empty cells
-    #             if self.board[i, j] == '#':
-    #                 color = (0, 0, 255)  # Blue color for walls
-    #                 pygame.draw.rect(screen, color, pygame.Rect(
-    #                     j * cell_size, i * cell_size, cell_size, cell_size))
-    #             elif self.board[i, j] == '.':
-    #                 color = (255, 255, 255)
-    #                 pygame.draw.circle(screen, color, (j * cell_size + cell_size // 2, i * cell_size + cell_size // 2),
-    #                                    cell_size // 10) 
-    #             elif self.board[i, j] == 'a':
-    #                 color = (255, 0, 0)
-    #                 pygame.draw.circle(screen, color, (j * cell_size + cell_size // 2, i * cell_size + cell_size // 2),
-    #                                    cell_size // 4)
-    #             elif self.board[i, j] == 'b':
-    #                 color = (255, 100, 0)
-    #                 pygame.draw.circle(screen, color, (j * cell_size + cell_size // 2, i * cell_size + cell_size // 2),
-    #                                    cell_size // 4)
-                                       
-    #             elif self.board[i, j] == 'c':
-    #                 color = (0, 255, 0)
-    #                 pygame.draw.circle(screen, color, (j * cell_size + cell_size // 2, i * cell_size + cell_size // 2),
-    #                                    cell_size // 4)
-                
-    #             elif self.board[i, j] == 'd':
-    #                 color = (0, 0, 255)
-    #                 pygame.draw.circle(screen, color, (j * cell_size + cell_size // 2, i * cell_size + cell_size // 2),
-    #                                    cell_size // 4)
-    #             elif self.board[i,j] == 'p':
-    #                 color = (255, 255, 0)
-    #                 pygame.draw.circle(screen, color, (j * cell_size + cell_size // 2, i * cell_size + cell_size // 2),
-    #                                    cell_size // 4)
-                   
-
-
-# pygame.init()
-
-# Screen dimensions
-
-
-
-# screen = pygame.display.set_mode((screen_width, screen_height))
-
-
-# # Create the board and setup the level
-# board = Board()
-# player = Player()
-# Ghost1 = Ghost(ghost1_pos[0],ghost1_pos[1],'a')
-
-
-
-
-# # Game loop
-# running = True
-# while running:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             running = False
-#         elif event.type == pygame.KEYDOWN:
-#             key = event.key
-#             if key == pygame.K_UP:
-#                 player.move(board,'up')
-#             elif key == pygame.K_DOWN:
-#                 player.move(board,'down')
-#             elif key == pygame.K_LEFT:
-#                 player.move(board,'left')
-#             elif key == pygame.K_RIGHT:
-#                 player.move(board,'right')
-
-#     # Clear the screen
-#     screen.fill((0, 0,0))
-
-#     # Draw the board
-#     board.draw(screen, cell_size)
-
-#     # Update the display
-#     pygame.display.flip()
-
-# pygame.quit()
-
-
+   

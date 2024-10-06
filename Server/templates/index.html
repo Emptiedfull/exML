@@ -20,7 +20,37 @@
     <div class="header">
         <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
     </div>
-    <div class="gamearea">
+    <div class="gameover" id="gameover">
+        <div class="over-header">
+            <h1>
+                Game Over
+                <span>
+                    The game has ended
+                </span>
+            </h1>
+           
+
+        </div>
+        <div class="ScoreBoard">
+            <div class="Winner row ">
+                <span>
+                    Winner
+                </span>
+                <span id="winner" class="blue">
+                    No winner
+                </span>
+            </div>
+            <div class="Score row ">
+                <span>
+                    Score
+                </span>
+                <span id="score" class="blue">
+                    0
+                </span>
+            </div>
+        </div>
+    </div>  
+    <div class="gamearea" id="gamearea">
         <div class="gameboard">
             <canvas id="background" class="canvas-layer" style="z-index: 1;"></canvas>
             <canvas id="walls" class="canvas-layer" style="z-index: 0;"></canvas>

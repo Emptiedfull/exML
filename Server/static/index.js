@@ -6,6 +6,8 @@ var ghost = document.getElementById('ghost-token')
 var player_dock = document.getElementById('player-dock')
 var ghost_dock = document.getElementById('ghost-dock')
 
+var gameover = document.getElementById('gameover')
+
 document.addEventListener('DOMContentLoaded', function() {
     reset_button = document.getElementById('reset')
     reset_button.addEventListener('click',reset)
@@ -73,16 +75,23 @@ socket.on('token',(token)=>{
     var player_token = token[0]
     var ghost_token = token[1]
     
-  
-
     player.innerHTML = player_token
     ghost.innerHTML = ghost_token
     
 })
 
-socket.on('game-over',()=>{
-    alert('Game Over')
-    location.reload();
+socket.on('game-over',({winner,timestamps})=>{
+
+    winnerdisplay = document.getElementById('winner')
+
+    gameover.style.opacity = 1
+    document.querySelector('.gamearea').classList.add('overlay-active');
+    winnerdisplay.style.opacity = 'nononon'
+    if  (winner == 'player'){
+        winnerdisplay.innerHTML = 'Player Wins'
+    }else{
+        winnerdisplay.innerHTML = 'Ghost Wins'
+    }
 
 })
 
@@ -90,7 +99,9 @@ socket.on('game-over',()=>{
 
 const show_points = (points) => {
     var point = document.getElementById('player-points')
+    var gameover_points = document.getElementById('score')
     point.innerHTML = points
+    gameover_points.innerHTML = points
 }
 
 const reset = () => {

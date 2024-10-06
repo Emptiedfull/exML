@@ -22,7 +22,7 @@ def disconnect():
     global connected
     connected = False
     print("Disconnected from server")
-    os.exit(0)
+    os._exit(0)
 
 @sio.event
 def reconnect():
