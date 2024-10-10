@@ -1,2 +1,0 @@
-
-uri= "mongodb+srv://atharavagarwal11:j9UbLJK8ZdMDKMPw@main.bnaon.mongodb.net/?retryWrites=true&w=majority&appName=main"

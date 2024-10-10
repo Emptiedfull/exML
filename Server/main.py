@@ -14,6 +14,7 @@ ghost_timestamp = None
 
 player_time = 0
 ghost_time = 0
+moves = 0
 
 def write_tokens_to_file(player_token, ghost_token, filename='tokens.txt'):
     with open(filename, 'w') as file:
@@ -28,6 +29,7 @@ def generate_random_string(length=8):
 
 
 connected_clients = []
+displayconnected = False
 player_token = generate_random_string()
 ghost_token = generate_random_string()
 write_tokens_to_file(player_token, ghost_token)
@@ -35,7 +37,7 @@ write_tokens_to_file(player_token, ghost_token)
 app = flask.Flask(__name__)
 socketio = flask_socketio.SocketIO(app)
 
-
+displayid = None
 
 player_move_docked = False
 ghost_move_docked = False
@@ -47,7 +49,7 @@ player_name = None
 ghost_name = None
 
 def initialize():
-    global board, player, ghost1, ghost2, ghost3, ghost4, ghosts, player_token, ghost_token, player_connected, ghost_connected, player_name, ghost_name, player_move_docked, ghost_move_docked, positions, player, ghost1, ghost2, ghost3, ghost4, board,connected_clients,player_timestamp,ghost_timestamp,player_time,ghost_time
+    global board, player, ghost1, ghost2, ghost3, ghost4, ghosts, player_token, ghost_token, player_connected, ghost_connected, player_name, ghost_name, player_move_docked, ghost_move_docked, positions, player, ghost1, ghost2, ghost3, ghost4, board,connected_clients,player_timestamp,ghost_timestamp,player_time,ghost_time,moves
 
     player_move_docked = False
     ghost_move_docked = False
@@ -66,6 +68,7 @@ def initialize():
 
     player_time = 0
     ghost_time = 0
+    moves=0
 
     player = Player(positions[0])
     ghost1 = Ghost(positions[1], "a")
@@ -157,7 +160,7 @@ def move_player(player,move):
 
 
 def handlemove(obj,move):
-    global player_move_docked,ghost_move_docked,ghost_move,player_move,player_timestamp,ghost_timestamp,player_time,ghost_time
+    global player_move_docked,ghost_move_docked,ghost_move,player_move,player_timestamp,ghost_timestamp,player_time,ghost_time,moves
 
     if obj == "player" and not player_move_docked:
         timeatmove = time.time()
@@ -179,6 +182,7 @@ def handlemove(obj,move):
     
     if player_move_docked and ghost_move_docked:
         player_timestamp,ghost_timestamp = time.time(),time.time()
+        moves += 1
         player_move_docked = False
         ghost_move_docked = False
         player_status  = move_player(player,player_move)
@@ -186,10 +190,10 @@ def handlemove(obj,move):
         socketio.emit('undock')
         socketio.emit('board', [board.get_board(),player.points])
         if player_status =="death" or status == "death":
-            socketio.emit('game-over',{'winner':'ghost','timestamps':[player_time,ghost_time]})
+            socketio.emit('game-over',{'winner':'ghost','timestamps':[player_time,ghost_time],'moves':moves})
             print('game over')
         elif board.food_left() == 0:
-            socketio.emit('game-over',{'winner':'player','timestamps':[player_time,ghost_time]})
+            socketio.emit('game-over',{'winner':'player','timestamps':[player_time,ghost_time],'moves':moves})
             print('game over')
         print(player_time,ghost_time)
     
@@ -199,6 +203,10 @@ def handlemove(obj,move):
 @app.route('/')
 def index():
     return flask.render_template('index.html')
+
+@app.route('/busy')
+def busy():
+    return flask.render_template('busy.html')
 
 
 @app.route('/move/player', methods=['POST'])
@@ -247,13 +255,20 @@ def display():
     if ghost_move_docked:
         socketio.emit('ghostdocked')
 
-
+@socketio.on('disconnect')
+def handle_disconnect():
+    global displayconnected,displayid
+    id = request.sid
+    if id == displayid:
+        displayconnected = False
+        print('display disconnected')
+        initialize()
 
 
 @socketio.on('connect')
 def handle_connect():
 
-    global player_connected,ghost_connected,player_name,ghost_name,player_timestamp,ghost_timestamp
+    global player_connected,ghost_connected,player_name,ghost_name,player_timestamp,ghost_timestamp,displayconnected,displayid
     
 
     
@@ -262,8 +277,15 @@ def handle_connect():
     server =  'http://127.0.0.1:5000/'
 
     if origin and origin.startswith(server):
+        if displayconnected:
+            socketio.emit('busy',to=request.sid)
+            print('display already connected,disconnecting')
+            return None
         id = request.sid
         socketio.emit('board', [board.get_board(), player.points], to=id)
+        socketio.emit('token', [player_token,ghost_token], to=id)
+        displayconnected = True
+        displayid = id
         display()
         print('display connected')
     else:

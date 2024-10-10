@@ -60,6 +60,10 @@ socket.on('ghost-connected',(name)=>{
     ghost.innerHTML = name
 })
 
+socket.on('busy',()=>{
+    window.location.href = '/busy'
+})
+
 socket.on('playerdocked',()=>{
     player_dock.innerHTML = 'Docked'
 })
@@ -92,6 +96,7 @@ socket.on('game-over',({winner,timestamps})=>{
     }else{
         winnerdisplay.innerHTML = 'Ghost Wins'
     }
+    console.log(timestamps)
 
 })
 

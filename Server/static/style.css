@@ -8,7 +8,7 @@
 }
 
 body{
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-family: 'Trebuchet MS';
     padding: 2.2%;
     display: flex;
     flex-direction: column;
@@ -37,7 +37,7 @@ body{
     background-color: rgba(0, 0, 0, 0.5); /* Dark filter with 50% opacity */
     pointer-events: none; /* Allow clicks to pass through the overlay */
     z-index: 1; /* Ensure the overlay is on top */
-    opacity:0;
+    opacity:0.1;
     transition: opacity 0.3s ease;
 }
 
@@ -172,7 +172,7 @@ body{
 }
 
 .over-header{
-    padding-top: 5%;
+    padding-top: 3%;
     ;
     justify-self: center;
     align-self: center;
@@ -207,5 +207,20 @@ body{
     display: flex;
     justify-content: space-between;
     margin-bottom: 2%;
-    font-weight: 700;
+    font-weight: 600;
     }
+
+.timestamps{
+    
+
+    margin-top: 2%;
+    align-self: center;
+    width: 50%;
+    
+}
+
+.timestamps h1{
+    margin-left: -10%;
+    font-size: 3vmin;
+}
+
