@@ -7,3 +7,5 @@ dependencies:
   - flask
   - flask-socketio
   - pip
+  - request
+  - socketio

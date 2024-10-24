@@ -1,17 +1,21 @@
 :root{
     --main:#2977F5;
-    --black:#051014
+    --black: #000000;
 }
 
 .blue{
     color: var(--main);
 }
 
+
+
 body{
     font-family: 'Trebuchet MS';
     padding: 2.2%;
     display: flex;
     flex-direction: column;
+
+    
    
 }
 
@@ -24,7 +28,7 @@ body{
     display: none;
     display: flex;
     margin-top: 2%;
-    background-color:rgba(255, 255, 255, 1);
+
     ;
 }
 .gamearea::before {
@@ -56,7 +60,7 @@ body{
 }
 
 .gamestatus{
-    padding-top: 3%;
+    
     margin-left:8%;
     width: calc(100% - 600px);
     display: flex;
@@ -129,27 +133,34 @@ body{
 .coll-content {
     
     overflow: hidden;
-    display: block;
+    display: none;
   
     transition: max-height 0.3s ease-out;
 }
 
 .controls{
-    padding-right: 10%;
+    height: 12%;
     margin-top: 6%;
     align-self: flex-end;
+    display: flex;
+    gap: 2%;
+
 }
 
-.reset{
+.btn{
     background-color: var(--main);
     color: white;
     border: none;
-    padding: 8%;
+    
     width: 100px;
     border-radius: 5px;
-    font-size: 2.5vmin;
+    font-size: 0.8rem;
     cursor: pointer;
+    text-align: center;
+
 }
+
+
 
 .gameover {
     opacity: 0;
@@ -224,3 +235,22 @@ body{
     font-size: 3vmin;
 }
 
+
+
+.available{
+    display: block;
+}
+.unavailable{
+    display: none;
+}
+
+.inp{
+    height: 100%;
+    width: 40%;
+    padding: 10px;
+    
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}

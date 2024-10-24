@@ -8,6 +8,7 @@ import random
 import string
 import time
 import argparse 
+from tokens import get_entry,add_entry,remove_entry
 
 player_timestamp = None
 ghost_timestamp = None
@@ -16,10 +17,9 @@ player_time = 0
 ghost_time = 0
 moves = 0
 
-def write_tokens_to_file(player_token, ghost_token, filename='tokens.txt'):
-    with open(filename, 'w') as file:
-        file.write(f"Player Token: {player_token}\n")
-        file.write(f"Ghost Token: {ghost_token}\n")
+participant_token = None
+participant_id = None
+
 
 
 def generate_random_string(length=8):
@@ -32,12 +32,16 @@ connected_clients = []
 displayconnected = False
 player_token = generate_random_string()
 ghost_token = generate_random_string()
-write_tokens_to_file(player_token, ghost_token)
+
 
 app = flask.Flask(__name__)
 socketio = flask_socketio.SocketIO(app)
 
-displayid = None
+from tokenHandler import token_handler
+
+app.register_blueprint(token_handler,url_prefix='/token')
+
+displayids = []
 
 player_move_docked = False
 ghost_move_docked = False
@@ -78,13 +82,10 @@ def initialize():
 
     ghosts = [ghost1, ghost2, ghost3, ghost4]
 
-    player_token = generate_random_string()
-    ghost_token = generate_random_string()
-    write_tokens_to_file(player_token, ghost_token)
+    socketio.emit('board', [board.get_board(), player.points])
 
-    for id in connected_clients:
-        disconnect(id)
-    connected_clients = []
+
+
 
     
     
@@ -107,8 +108,26 @@ ghosts = [ghost1,ghost2,ghost3,ghost4]
 
 @socketio.on('reset')
 def reset():
+   id = request.sid
+   if id != participant_id:
+       return
    print('reset')
    initialize()
+
+@socketio.on('end')
+def end():
+    player_remove()
+
+
+def player_remove():
+    global player_connected,player_name,player_token,participant_id,participant_token
+    participant_id  = None
+    remove_entry(participant_token)
+    participant_token = None
+    socketio.emit('token-refresh')
+
+
+
 
 
 def move_ghost(ghost,move,board):
@@ -149,7 +168,7 @@ def move_player(player,move):
         
     else:
         status = "invalid move"
-    if state == "death":
+    if state and state == "death":
         status = "death"
     else:
         status = "success"
@@ -245,6 +264,8 @@ def ghost_move():
     return flask.jsonify({"status": "success"})
    
 
+
+
 def display():
     if player_connected:
         socketio.emit('player-connected',player_name)
@@ -255,20 +276,12 @@ def display():
     if ghost_move_docked:
         socketio.emit('ghostdocked')
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    global displayconnected,displayid
-    id = request.sid
-    if id == displayid:
-        displayconnected = False
-        print('display disconnected')
-        initialize()
 
 
 @socketio.on('connect')
 def handle_connect():
 
-    global player_connected,ghost_connected,player_name,ghost_name,player_timestamp,ghost_timestamp,displayconnected,displayid
+    global player_connected,ghost_connected,player_name,ghost_name,player_timestamp,ghost_timestamp,displayconnected,displayids,player_id,participant_id,participant_token
     
 
     
@@ -277,17 +290,36 @@ def handle_connect():
     server =  'http://127.0.0.1:5000/'
 
     if origin and origin.startswith(server):
-        if displayconnected:
-            socketio.emit('busy',to=request.sid)
-            print('display already connected,disconnecting')
-            return None
         id = request.sid
+        displayids.append(id)
         socketio.emit('board', [board.get_board(), player.points], to=id)
-        socketio.emit('token', [player_token,ghost_token], to=id)
-        displayconnected = True
-        displayid = id
-        display()
-        print('display connected')
+        if request.headers.get('Authorization') == "Bearer null":
+            print('no token')
+            socketio.emit("position",{"position":"observer"},to=request.sid)
+        print(request.headers.get('Authorization'))
+        try:
+            token = request.headers.get('Authorization').split(' ')[1]
+            token_entry = get_entry(token)
+        except:
+            token_entry = None
+       
+        if participant_id == id:
+            socketio.emit("position",{"position":"player"},to=request.sid)
+            socketio.emit('token',[player_token,ghost_token],to=request.sid)
+
+        if token_entry == None:
+            socketio.emit("position",{"position":"observe"},to=request.sid)
+        else:
+            if token_entry["role"] == "player":
+                participant_id = request.sid
+                participant_token = token
+                socketio.emit("position",{"position":"player"},to=request.sid)
+                socketio.emit('token',[player_token,ghost_token],to=request.sid)
+        print(token_entry)
+        
+
+
+
     else:
         if request.headers.get('Authorization') == None:
             print('no token')

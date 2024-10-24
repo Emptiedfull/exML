@@ -1,4 +1,93 @@
-var socket = io();
+
+function setToken(token) {
+    localStorage.setItem('token', token);
+    reloadSocketConnection();
+}
+
+
+function initializeSocket() {
+    console.log('Initializing socket connection');
+    console.log(localStorage.getItem('token'))
+    return io({
+        extraHeaders: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+    });
+}
+
+// Function to reload the socket connection
+function reloadSocketConnection() {
+    if (socket) {
+        socket.disconnect();
+    }
+    socket = initializeSocket();
+    setupSocketHandlers();
+}
+
+function setupSocketHandlers() {
+    socket.on('connect', function () {
+        console.log('Connected to server');
+    });
+
+    socket.on('board', (board) => {
+
+        drawBoard(board[0]);
+        show_points(board[1])
+    })
+
+    socket.on('player-connected', (name) => {
+        player.innerHTML = name
+    })
+    socket.on('ghost-connected', (name) => {
+        ghost.innerHTML = name
+    })
+
+    socket.on('busy', () => {
+        window.location.href = '/busy'
+    })
+
+    socket.on('playerdocked', () => {
+        player_dock.innerHTML = 'Docked'
+    })
+    socket.on('ghostdocked', () => {
+        ghost_dock.innerHTML = 'Docked'
+    })
+    socket.on('undock', () => {
+        player_dock.innerHTML = ''
+        ghost_dock.innerHTML = ''
+    })
+
+    socket.on('token', (token) => {
+        var player_token = token[0]
+        var ghost_token = token[1]
+
+        player.innerHTML = player_token
+        ghost.innerHTML = ghost_token
+
+    })
+
+    socket.on("spectator", () => {
+        controls = document.getElementById('controls')
+        controls.innerHTML = ''
+    })
+
+    socket.on('')
+    socket.on('game-over', ({ winner, timestamps }) => {
+
+        winnerdisplay = document.getElementById('winner')
+
+        gameover.style.opacity = 1
+        document.querySelector('.gamearea').classList.add('overlay-active');
+        winnerdisplay.style.opacity = 'nononon'
+        if (winner == 'player') {
+            winnerdisplay.innerHTML = 'Player Wins'
+        } else {
+            winnerdisplay.innerHTML = 'Ghost Wins'
+        }
+        console.log(timestamps)
+
+    })
+}
 
 var player = document.getElementById('player-token')
 var ghost = document.getElementById('ghost-token')
@@ -8,97 +97,106 @@ var ghost_dock = document.getElementById('ghost-dock')
 
 var gameover = document.getElementById('gameover')
 
-document.addEventListener('DOMContentLoaded', function() {
+var socket = initializeSocket()
+setupSocketHandlers()
+reloadSocketConnection();
+
+document.addEventListener('DOMContentLoaded', function () {
+    check_token(localStorage.getItem('token'))
+
     reset_button = document.getElementById('reset')
-    reset_button.addEventListener('click',reset)
+    reset_button.addEventListener('click', reset)
 
+    reset_button.style.display = 'none'
+    end = document.getElementById('end')
+    end.style.display = 'none'
 
+    end.addEventListener('click', () => {
+        socket.emit('end')
+        check_token(localStorage.getItem('token'))
+    })
 
     var part_coll = document.getElementById('part-coll')
     var part_content = document.getElementById('part-content')
 
-    part_coll.addEventListener('click',()=>{
+    part_coll.addEventListener('click', () => {
 
-        if (part_content.style.display === 'block'){
+        if (part_content.style.display === 'block') {
             part_content.style.display = 'none'
             part_content.style.maxHeight = 0
-         }else{
+        } else {
             part_content.style.display = 'block'
             part_content.style.maxHeight = part_content.scrollHeight + 'px'
-         }
+        }
     })
 
     var moves_coll = document.getElementById('moves-coll')
     var moves_content = document.getElementById('moves-content')
 
-    moves_coll.addEventListener('click',()=>{
-        if (moves_content.style.display === 'block'){
+    moves_coll.addEventListener('click', () => {
+        if (moves_content.style.display === 'block') {
             moves_content.style.display = 'none'
             moves_content.style.maxHeight = 0
-         }else{
+        } else {
             moves_content.style.display = 'block'
             moves_content.style.maxHeight = moves_content.scrollHeight + 'px'
-         }
+        }
     })
 
-    console.log(part_coll,part_content)
-})
-socket.on('connect', function() {
-            console.log('Connected to server');
-        });
-
-socket.on('board',(board)=>{
+    queue = document.getElementById('queue-status')
+    tokenInput = document.getElementById('token-input')
     
-    drawBoard(board[0]);
-    show_points(board[1])
+
+    saveTokenButton = document.getElementById('save-token');
+    saveTokenButton.addEventListener('click', function () {
+        var tokenInput = document.getElementById('token-input').value;
+        setToken(tokenInput);
+       
+        check_token(tokenInput)
+    });
+
+    emailInput = document.getElementById('email-input')
+    emailButton = document.getElementById('token-get')
 })
 
-socket.on('player-connected',(name)=>{
-    player.innerHTML = name
-})
-socket.on('ghost-connected',(name)=>{
-    ghost.innerHTML = name
-})
+const check_token = (token) => {
+    fetch(`/token/get?token=${encodeURIComponent(token)}`,{
+        method:"GET",
+        headers:{
+            'Content-Type':"application/json"
+        }
+    }).then(response=>{
+        
+        return response.json()
+    }).then(data=>{
+        if (data.status.role == 'player') {
+            assign_player()
 
-socket.on('busy',()=>{
-    window.location.href = '/busy'
-})
+        }else if(data.status.role == 'observer'){
+            assign_spectator(data.status.position)
+        }
+        console.log(data.status)
+    }).catch(eror=>{
 
-socket.on('playerdocked',()=>{
-    player_dock.innerHTML = 'Docked'
-})
-socket.on('ghostdocked',()=>{
-    ghost_dock.innerHTML = 'Docked'
-})
-socket.on('undock',()=>{
-    player_dock.innerHTML = ''
-    ghost_dock.innerHTML = ''
-})
+        console.error(eror)
+    })
+}
 
-socket.on('token',(token)=>{
-    var player_token = token[0]
-    var ghost_token = token[1]
-    
-    player.innerHTML = player_token
-    ghost.innerHTML = ghost_token
-    
-})
 
-socket.on('game-over',({winner,timestamps})=>{
+const assign_player = ()=>{
+      queue.innerHTML = 'You are currently playing, find the player and ghost tokens above'
+      tokenInput.style.display = 'none'
+      saveTokenButton.style.display = 'none'
+      reset_button.style.display = 'block'
+      end.style.display = 'block'
+}
 
-    winnerdisplay = document.getElementById('winner')
-
-    gameover.style.opacity = 1
-    document.querySelector('.gamearea').classList.add('overlay-active');
-    winnerdisplay.style.opacity = 'nononon'
-    if  (winner == 'player'){
-        winnerdisplay.innerHTML = 'Player Wins'
-    }else{
-        winnerdisplay.innerHTML = 'Ghost Wins'
-    }
-    console.log(timestamps)
-
-})
+const assign_spectator = (position)=>{
+    queue.innerHTML = `You are at position ${position} in the queue`
+    tokenInput.style.display = 'none'
+    saveTokenButton.style.display = 'none'
+    reset_button.style.display = 'none'
+}
 
 
 
@@ -111,11 +209,11 @@ const show_points = (points) => {
 
 const reset = () => {
     socket.emit('reset')
-    location.reload()
+
 
 }
 
-function setCanvasDimensions(x,y) {
+function setCanvasDimensions(x, y) {
     var canvas = document.getElementsByClassName('canvas-layer');
     for (var i = 0; i < canvas.length; i++) {
         canvas[i].width = x;
@@ -123,7 +221,7 @@ function setCanvasDimensions(x,y) {
     }
 }
 
-function drawBoard(board){
+function drawBoard(board) {
     var wallsCv = document.getElementById('walls');
     var wallsCtx = wallsCv.getContext('2d');
     var BackgroundCv = document.getElementById('background');
@@ -133,55 +231,55 @@ function drawBoard(board){
 
 
     var CellSize = 14;
-    var x = board[0].length*CellSize
-    var y = board.length*CellSize
-    setCanvasDimensions(x,y)
+    var x = board[0].length * CellSize
+    var y = board.length * CellSize
+    setCanvasDimensions(x, y)
 
     BackgroundCtx.clearRect(0, 0, x, y);
     wallsCtx.clearRect(0, 0, x, y);
     foregroundCtx.clearRect(0, 0, x, y);
 
-    for (var row=0;row<board.length;row++){
-        for (var col=0;col<board[0].length;col++){
+    for (var row = 0; row < board.length; row++) {
+        for (var col = 0; col < board[0].length; col++) {
 
-            try{
+            try {
                 cell = board[row][col]
-            }catch{
-                console.log(row,col)
+            } catch {
+                console.log(row, col)
                 cell = board[row][col]
-               
+
                 continue
             }
-            
-            if (cell == "#"){
-                wallsCtx.fillStyle = 'black';
-                wallsCtx.fillRect(col*CellSize,row*CellSize,CellSize,CellSize);
-            }
-         
 
-            if (cell == "."){
+            if (cell == "#") {
+                wallsCtx.fillStyle = 'black';
+                wallsCtx.fillRect(col * CellSize, row * CellSize, CellSize, CellSize);
+            }
+
+
+            if (cell == ".") {
                 foregroundCtx.fillStyle = 'orange';
-                drawCircle(foregroundCtx,col*CellSize+CellSize/2,row*CellSize+CellSize/2,CellSize/6);
+                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 6);
             }
-            if (cell == "p"){
+            if (cell == "p") {
                 foregroundCtx.fillStyle = 'yellow';
-                drawCircle(foregroundCtx,col*CellSize+CellSize/2,row*CellSize+CellSize/2,CellSize/3);
+                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
             }
-            if (cell == "a"){
+            if (cell == "a") {
                 foregroundCtx.fillStyle = 'purple';
-                drawCircle(foregroundCtx,col*CellSize+CellSize/2,row*CellSize+CellSize/2,CellSize/3);
+                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
             }
-            if (cell == "b"){
+            if (cell == "b") {
                 foregroundCtx.fillStyle = 'red';
-                drawCircle(foregroundCtx,col*CellSize+CellSize/2,row*CellSize+CellSize/2,CellSize/3);
+                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
             }
-            if (cell == "c"){
+            if (cell == "c") {
                 foregroundCtx.fillStyle = 'blue';
-                drawCircle(foregroundCtx,col*CellSize+CellSize/2,row*CellSize+CellSize/2,CellSize/3);
+                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
             }
-            if (cell == "d"){
+            if (cell == "d") {
                 foregroundCtx.fillStyle = 'green';
-                drawCircle(foregroundCtx,col*CellSize+CellSize/2,row*CellSize+CellSize/2,CellSize/3);
+                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
             }
         }
     }

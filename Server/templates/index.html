@@ -28,7 +28,7 @@
                     The game has ended
                 </span>
             </h1>
-           
+
 
         </div>
         <div class="ScoreBoard">
@@ -70,7 +70,7 @@
                 </span>
             </div>
         </div>
-    </div>  
+    </div>
     <div class="gamearea" id="gamearea">
         <div class="gameboard">
             <canvas id="background" class="canvas-layer" style="z-index: 1;"></canvas>
@@ -106,6 +106,9 @@
                             waiting for connection...
                         </span>
                     </div>
+                    <div>
+
+                    </div>
 
                 </div>
                 <div class="Moves">
@@ -137,14 +140,35 @@
 
 
                 </div>
+                <div class="Queue">
+                    <h1 class="sub-title">
+                        Queue Status
+                    </h1>
+                    <span id="queue-status">
+                        You are not in Queue
+                    </span>
+                </div>
 
 
             </div>
-           <div class="controls">
-                <button class="reset" id="reset">
+            <div class="controls" id="controls">
+                <button class="reset btn" id="reset">
                     Reset Board
                 </button>
-           </div>
+                <button class="end btn" id="end">
+                    End Game
+                </button>
+                
+                <input type="text" id="token-input" placeholder="enter token" class="inp">
+                <button class="token btn" id="save-token">
+                    Submit Token</button>
+
+                 
+                 <input type="email" id="email-input" placeholder="Enter your email" class="inp">
+                 <button class="token btn" id="get-token">
+                     Enter Queue
+                 </button>
+             
         </div>
 
     </div>
