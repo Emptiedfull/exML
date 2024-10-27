@@ -83,6 +83,7 @@ def initialize():
     ghosts = [ghost1, ghost2, ghost3, ghost4]
 
     socketio.emit('board', [board.get_board(), player.points])
+    
 
 
 
@@ -112,11 +113,29 @@ def reset():
    if id != participant_id:
        return
    print('reset')
+   socketio.emit('reset')
+   socketio.emit('tokens',[player_token,ghost_token])
    initialize()
+
+def token_expire():
+    global participant_id,participant_token
+    participant_id = None
+    participant_token = None
+    initialize()
+    socketio.emit('token-refresh')
+
+
+
+@socketio.on('start')
+def start():
+    socketio.emit('board', [board.get_board(), player.points])
+    print('start')
 
 @socketio.on('end')
 def end():
     player_remove()
+    initialize()
+    socketio.emit('token-refresh')
 
 
 def player_remove():
@@ -223,9 +242,11 @@ def handlemove(obj,move):
 def index():
     return flask.render_template('index.html')
 
-@app.route('/busy')
-def busy():
-    return flask.render_template('busy.html')
+@app.route('/token-expire',methods=['POST'])
+def token_expire():
+    socketio.emit('token-refresh')
+    print("token expired")
+    return flask.jsonify({"status":"success"})
 
 
 @app.route('/move/player', methods=['POST'])
@@ -255,6 +276,8 @@ def ghost_move():
         return flask.jsonify({"error":"Missing Token"}), 401
     if not isinstance(move, list):
         return flask.jsonify({"error": "Invalid move"}),400
+    if len(move) != 4:
+        return flask.jsonify({"error": "Invalid move"}),400
     if token != ghost_token:
         return flask.jsonify({"error": "Unauthorized"}),403
     if not ghost_connected:
@@ -264,9 +287,11 @@ def ghost_move():
     return flask.jsonify({"status": "success"})
    
 
-
+    
 
 def display():
+    
+
     if player_connected:
         socketio.emit('player-connected',player_name)
     if ghost_connected:
@@ -276,11 +301,13 @@ def display():
     if ghost_move_docked:
         socketio.emit('ghostdocked')
 
-
+@socketio.on('request')
+def request_board():
+    socketio.emit('board', [board.get_board(), player.points])
 
 @socketio.on('connect')
 def handle_connect():
-
+   
     global player_connected,ghost_connected,player_name,ghost_name,player_timestamp,ghost_timestamp,displayconnected,displayids,player_id,participant_id,participant_token
     
 
@@ -288,11 +315,12 @@ def handle_connect():
    
     origin = request.headers.get('Referer')
     server =  'http://127.0.0.1:5000/'
-
-    if origin and origin.startswith(server):
+    socketio.emit('board', [board.get_board(), player.points])
+    if origin:
         id = request.sid
         displayids.append(id)
         socketio.emit('board', [board.get_board(), player.points], to=id)
+        display()
         if request.headers.get('Authorization') == "Bearer null":
             print('no token')
             socketio.emit("position",{"position":"observer"},to=request.sid)
@@ -315,6 +343,7 @@ def handle_connect():
                 participant_token = token
                 socketio.emit("position",{"position":"player"},to=request.sid)
                 socketio.emit('token',[player_token,ghost_token],to=request.sid)
+                display()
         print(token_entry)
         
 
@@ -335,17 +364,21 @@ def handle_connect():
             player_connected = True
             player_name = name
             socketio.emit('player-connected',name)
+
             connected_clients.append(request.sid)
             player_timestamp = time.time()
+            socketio.emit('board', [board.get_board(), player.points])
             print('player connected')
         elif token == ghost_token:
             if ghost_connected == True:
                 raise ConnectionRefusedError('ghost already connected')
+            
             ghost_connected = True
             ghost_name = name
             socketio.emit('ghost-connected',name)
             connected_clients.append(request.sid)
             ghost_timestamp = time.time()
+          
             print('ghost connected')
         else:
             print('invalid token')

@@ -2,6 +2,7 @@ from flask import blueprints
 import flask
 from tokens import add_entry,remove_entry,get_entry,get_all
 
+
 token_handler = blueprints.Blueprint('token_handler', __name__)
 
 @token_handler.route('/add',methods=['POST'])
@@ -12,7 +13,11 @@ def add_token():
         return flask.jsonify({"error":"Missing email"}),400
     status = add_entry(email.get('email'))
     if status == "failed":
+        print("email in queue")
         return flask.jsonify({"error":"Email already in queue"}),400
+    if status == "invalid email":
+        return flask.jsonify({"error":"Invalid email"})
+    print(status)
     return flask.jsonify({"status":status})
 
     

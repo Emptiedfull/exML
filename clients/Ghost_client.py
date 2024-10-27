@@ -15,6 +15,7 @@ def connect():
     global connected
     connected = True
     print("Connected to server")
+    sio.emit('request')
 
 @sio.event
 def disconnect():
@@ -31,16 +32,23 @@ def reconnect():
 
 @sio.on('board')
 def handle_server_message(data):
+    print(data[0])
     if not connected:
         print("Not connected yet,ignoring message")
         return
     board,points = data
     process(board,points)
-   
+
+@sio.on('reset')
+def reset():
+
+    print("Resetting")
+    os._exit(0)   
+
 def process(board,points):
-    move = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-    #create model here
-    # send_move(move)
+    move = [[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]]
+    
+    send_move(move)
 
 def send_move(move):
    url = f"{link}/move/ghost"

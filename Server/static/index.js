@@ -41,6 +41,10 @@ function setupSocketHandlers() {
     socket.on('ghost-connected', (name) => {
         ghost.innerHTML = name
     })
+    socket.on('token-refresh',()=>{
+        console.log('token refresh')
+        location.reload()
+    })
 
     socket.on('busy', () => {
         window.location.href = '/busy'
@@ -101,8 +105,18 @@ var socket = initializeSocket()
 setupSocketHandlers()
 reloadSocketConnection();
 
+
 document.addEventListener('DOMContentLoaded', function () {
     check_token(localStorage.getItem('token'))
+
+    pacman = new Image();
+    pacman.src = '/static/images/sprites/pacman.png';
+
+    purple = new Image();
+    purple.src = '/static/images/sprites/purple.png';
+
+    red = new Image();
+    red.src = '/static/images/sprites/red.png';
 
     reset_button = document.getElementById('reset')
     reset_button.addEventListener('click', reset)
@@ -111,9 +125,12 @@ document.addEventListener('DOMContentLoaded', function () {
     end = document.getElementById('end')
     end.style.display = 'none'
 
+    commands = document.getElementById('commands')
+    commands.style.display = 'none'
+ 
     end.addEventListener('click', () => {
         socket.emit('end')
-        check_token(localStorage.getItem('token'))
+        this.location.reload()
     })
 
     var part_coll = document.getElementById('part-coll')
@@ -150,14 +167,60 @@ document.addEventListener('DOMContentLoaded', function () {
     saveTokenButton = document.getElementById('save-token');
     saveTokenButton.addEventListener('click', function () {
         var tokenInput = document.getElementById('token-input').value;
-        setToken(tokenInput);
        
+        setToken(tokenInput);
         check_token(tokenInput)
+        
     });
 
     emailInput = document.getElementById('email-input')
-    emailButton = document.getElementById('token-get')
+    emailButton = document.getElementById('get-token')
+
+    emailButton.addEventListener('click',()=>{
+        email = emailInput.value
+        
+        if (!validateEmail(email)){
+            queue.innerHTML = 'Invalid Email'
+            return console.log("invalid email")
+        } 
+        queue.innerHTML = "Sending Email..."
+        add_token(email)
+    })
+
+
+
 })
+
+const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+const add_token = (email)=>{
+    console.log(email)
+    fetch(`/token/add`,{
+        method:"POST",
+        headers:{
+            'Content-Type':"application/json"
+        },
+        body: JSON.stringify({email:email})
+    }).then(response=>{
+        if (!response.ok) {
+
+        }
+        return response.json();
+    }).then(data=>{
+       if (data.error){
+        return queue.innerHTML = data.error
+       }
+       if (data.status == "success"){
+        return queue.innerHTML = "Your queue token has been sent to your email"
+       }
+        
+    }).catch(e=>{
+        console.log(console.dire(e))
+    })
+}
 
 const check_token = (token) => {
     fetch(`/token/get?token=${encodeURIComponent(token)}`,{
@@ -169,13 +232,16 @@ const check_token = (token) => {
         
         return response.json()
     }).then(data=>{
+        if (!data.status){
+            return queue.innerHTML = 'Your current token is expired/invalid'
+        }
         if (data.status.role == 'player') {
             assign_player()
 
         }else if(data.status.role == 'observer'){
             assign_spectator(data.status.position)
         }
-        console.log(data.status)
+       
     }).catch(eror=>{
 
         console.error(eror)
@@ -189,6 +255,10 @@ const assign_player = ()=>{
       saveTokenButton.style.display = 'none'
       reset_button.style.display = 'block'
       end.style.display = 'block'
+      commands.style.display = 'block'
+   
+      emailInput.style.display = "none"
+      emailButton.style.display = "none"
 }
 
 const assign_spectator = (position)=>{
@@ -196,6 +266,8 @@ const assign_spectator = (position)=>{
     tokenInput.style.display = 'none'
     saveTokenButton.style.display = 'none'
     reset_button.style.display = 'none'
+    emailInput.style.display = "none"
+      emailButton.style.display = "none"
 }
 
 
@@ -209,9 +281,13 @@ const show_points = (points) => {
 
 const reset = () => {
     socket.emit('reset')
+    location.reload()
+    
 
 
 }
+
+
 
 function setCanvasDimensions(x, y) {
     var canvas = document.getElementsByClassName('canvas-layer');
@@ -227,12 +303,27 @@ function drawBoard(board) {
     var BackgroundCv = document.getElementById('background');
     var BackgroundCtx = BackgroundCv.getContext('2d');
     var foregroundCv = document.getElementById('foreground')
-    var foregroundCtx = foregroundCv.getContext('2d');
+    var foregroundCtx = foregroundCv.getContext('2d'); 
 
+    gameboard = document.getElementById('gameboard')
+    gamestatus = document.getElementById('gamestatus')
 
-    var CellSize = 14;
+    console.log(window.innerWidth, window.innerHeight)
+    console.log(board[0].length, board.length)
+
+    if (window.innerWidth > window.innerHeight) {
+        var CellSize = (window.innerHeight / board.length)*70/100
+    }else{
+        var CellSize = (window.innerWidth / board[0].length)*90/100
+    }
+   
     var x = board[0].length * CellSize
     var y = board.length * CellSize
+
+    gameboard.style.width = x + 'px'
+    gameboard.style.height = y + 'px'
+    gamestatus.style.width = (window.innerWidth - x-100) + 'px'
+    console.log(x, y)
     setCanvasDimensions(x, y)
 
     BackgroundCtx.clearRect(0, 0, x, y);
@@ -262,24 +353,51 @@ function drawBoard(board) {
                 drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 6);
             }
             if (cell == "p") {
-                foregroundCtx.fillStyle = 'yellow';
-                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
+             
+                foregroundCtx.drawImage(pacman, col * CellSize, row * CellSize, CellSize, CellSize);
+              
             }
             if (cell == "a") {
-                foregroundCtx.fillStyle = 'purple';
-                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
+                foregroundCtx.drawImage(red, col * CellSize, row * CellSize, CellSize, CellSize);
             }
             if (cell == "b") {
-                foregroundCtx.fillStyle = 'red';
-                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
+                const offScreenCanvas = document.createElement('canvas');
+                offScreenCanvas.width = CellSize;
+                offScreenCanvas.height = CellSize;
+                const offScreenCtx = offScreenCanvas.getContext('2d');
+            
+                // Apply filter to the off-screen canvas
+                offScreenCtx.filter = 'hue-rotate(270deg)';
+                offScreenCtx.drawImage(red, 0, 0, CellSize, CellSize);
+            
+                // Draw the filtered image onto the main canvas
+                foregroundCtx.drawImage(offScreenCanvas, col * CellSize, row * CellSize, CellSize, CellSize);
             }
             if (cell == "c") {
-                foregroundCtx.fillStyle = 'blue';
-                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
+                const offScreenCanvas = document.createElement('canvas');
+                offScreenCanvas.width = CellSize;
+                offScreenCanvas.height = CellSize;
+                const offScreenCtx = offScreenCanvas.getContext('2d');
+            
+                // Apply filter to the off-screen canvas
+                offScreenCtx.filter = 'hue-rotate(120deg)';
+                offScreenCtx.drawImage(red, 0, 0, CellSize, CellSize);
+            
+                // Draw the filtered image onto the main canvas
+                foregroundCtx.drawImage(offScreenCanvas, col * CellSize, row * CellSize, CellSize, CellSize);
             }
             if (cell == "d") {
-                foregroundCtx.fillStyle = 'green';
-                drawCircle(foregroundCtx, col * CellSize + CellSize / 2, row * CellSize + CellSize / 2, CellSize / 3);
+                const offScreenCanvas = document.createElement('canvas');
+                offScreenCanvas.width = CellSize;
+                offScreenCanvas.height = CellSize;
+                const offScreenCtx = offScreenCanvas.getContext('2d');
+            
+                // Apply filter to the off-screen canvas
+                offScreenCtx.filter = 'hue-rotate(320deg)';
+                offScreenCtx.drawImage(red, 0, 0, CellSize, CellSize);
+            
+                // Draw the filtered image onto the main canvas
+                foregroundCtx.drawImage(offScreenCanvas, col * CellSize, row * CellSize, CellSize, CellSize);
             }
         }
     }

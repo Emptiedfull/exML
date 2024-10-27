@@ -16,6 +16,7 @@ def connect():
     global connected
     connected = True
     print("Connected to server")
+    socketio.emit('request')
 
 @sio.event
 def disconnect():
@@ -30,6 +31,12 @@ def reconnect():
     connected = True
     print("Reconnected to server")
 
+
+@sio.on('reset')
+def reset():
+    print("Resetting")
+    os._exit(0)
+
 @sio.on('board')
 def handle_server_message(data):
     if not connected:
@@ -40,9 +47,10 @@ def handle_server_message(data):
    
 
 def process(board,points):
-    move = [0,0,0,0]
+    print('process')
+    move = [0,0,0,1]
     #create model here
-    # send_move(move)
+    send_move(move)
 
 def send_move(move):
    url = f"{link}/move/player"

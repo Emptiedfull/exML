@@ -72,12 +72,12 @@
         </div>
     </div>
     <div class="gamearea" id="gamearea">
-        <div class="gameboard">
+        <div class="gameboard" id="gameboard">
             <canvas id="background" class="canvas-layer" style="z-index: 1;"></canvas>
             <canvas id="walls" class="canvas-layer" style="z-index: 0;"></canvas>
             <canvas id="foreground" class="canvas-layer" style="z-index: 2;"></canvas>
         </div>
-        <div class="gamestatus">
+        <div class="gamestatus" id="gamestatus">
             <div class="points">
                 <h1 class="title">Player points</h1>
                 <div id="player-points"></div>
@@ -152,22 +152,30 @@
 
             </div>
             <div class="controls" id="controls">
-                <button class="reset btn" id="reset">
-                    Reset Board
-                </button>
-                <button class="end btn" id="end">
-                    End Game
-                </button>
+                <div class="btnrow" id="commands">
+                    <button class="reset btn" id="reset">
+                        Reset Board
+                    </button>
+                    <button class="end btn" id="end">
+                        End Game
+                    </button>
+                </div>
+                <div class="btnrow">
+                    <input type="text" id="token-input" placeholder="enter token" class="inp">
+                    <button class="token btn" id="save-token">
+                        Submit Token</button>
+                </div>
                 
-                <input type="text" id="token-input" placeholder="enter token" class="inp">
-                <button class="token btn" id="save-token">
-                    Submit Token</button>
-
-                 
-                 <input type="email" id="email-input" placeholder="Enter your email" class="inp">
-                 <button class="token btn" id="get-token">
-                     Enter Queue
-                 </button>
+                <div class="btnrow">
+                   
+    
+                     
+                     <input type="email" id="email-input" placeholder="Enter your email" class="inp">
+                     <button class="token btn" id="get-token">
+                         Enter Queue
+                     </button>
+                </div>
+               
              
         </div>
 
