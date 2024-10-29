@@ -81,14 +81,28 @@ function setupSocketHandlers() {
         winnerdisplay = document.getElementById('winner')
 
         gameover.style.opacity = 1
+        gameover.style.pointerEvents = 'all'
         document.querySelector('.gamearea').classList.add('overlay-active');
-        winnerdisplay.style.opacity = 'nononon'
+
         if (winner == 'player') {
-            winnerdisplay.innerHTML = 'Player Wins'
+            winnerdisplay.innerHTML = 'Player'
         } else {
-            winnerdisplay.innerHTML = 'Ghost Wins'
+            winnerdisplay.innerHTML = 'Ghost'
         }
+
+        player_timestamp = document.getElementById('player-timestamp')
+        ghost_timestamp = document.getElementById('ghost-timestamp')
+
+        player_timestamp.innerHTML = timestamps[0]
+        ghost_timestamp.innerHTML = timestamps[1]
+        
         console.log(timestamps)
+
+    })
+    socket.on('score',(score)=>{
+        scoreArea  = document.getElementById('score')
+        scoreArea.innerHTML = score
+        console.log(score)
 
     })
 }
@@ -159,6 +173,16 @@ document.addEventListener('DOMContentLoaded', function () {
             moves_content.style.maxHeight = moves_content.scrollHeight + 'px'
         }
     })
+
+    var close = document.getElementById('close-icon')
+
+    close.addEventListener('click', () => {
+        console.log('clicked')
+        gameover.style.opacity = 0
+        gameover.style.pointerEvents = 'none'
+        document.querySelector('.gamearea').classList.remove('overlay-active');
+    })
+
 
     queue = document.getElementById('queue-status')
     tokenInput = document.getElementById('token-input')
@@ -311,18 +335,24 @@ function drawBoard(board) {
     console.log(window.innerWidth, window.innerHeight)
     console.log(board[0].length, board.length)
 
+
+
     if (window.innerWidth > window.innerHeight) {
         var CellSize = (window.innerHeight / board.length)*70/100
+        var x = board[0].length * CellSize
+    var y = board.length * CellSize
+         gamestatus.style.width = (window.innerWidth - x-100) + 'px'
     }else{
         var CellSize = (window.innerWidth / board[0].length)*90/100
+        var x = board[0].length * CellSize
+    var y = board.length * CellSizew
     }
    
-    var x = board[0].length * CellSize
-    var y = board.length * CellSize
+    
 
     gameboard.style.width = x + 'px'
     gameboard.style.height = y + 'px'
-    gamestatus.style.width = (window.innerWidth - x-100) + 'px'
+   
     console.log(x, y)
     setCanvasDimensions(x, y)
 
@@ -354,11 +384,11 @@ function drawBoard(board) {
             }
             if (cell == "p") {
              
-                foregroundCtx.drawImage(pacman, col * CellSize, row * CellSize, CellSize, CellSize);
+                foregroundCtx.drawImage(pacman, col * CellSize, row * CellSize, CellSize, CellSize*0.9);
               
             }
             if (cell == "a") {
-                foregroundCtx.drawImage(red, col * CellSize, row * CellSize, CellSize, CellSize);
+                foregroundCtx.drawImage(red, col * CellSize, row * CellSize, CellSize*0.9, CellSize*0.9);
             }
             if (cell == "b") {
                 const offScreenCanvas = document.createElement('canvas');
@@ -368,7 +398,7 @@ function drawBoard(board) {
             
                 // Apply filter to the off-screen canvas
                 offScreenCtx.filter = 'hue-rotate(270deg)';
-                offScreenCtx.drawImage(red, 0, 0, CellSize, CellSize);
+                offScreenCtx.drawImage(red, 0, 0, CellSize*0.9, CellSize*0.9);
             
                 // Draw the filtered image onto the main canvas
                 foregroundCtx.drawImage(offScreenCanvas, col * CellSize, row * CellSize, CellSize, CellSize);
@@ -381,7 +411,7 @@ function drawBoard(board) {
             
                 // Apply filter to the off-screen canvas
                 offScreenCtx.filter = 'hue-rotate(120deg)';
-                offScreenCtx.drawImage(red, 0, 0, CellSize, CellSize);
+                offScreenCtx.drawImage(red, 0, 0, CellSize*0.9, CellSize*0.9);
             
                 // Draw the filtered image onto the main canvas
                 foregroundCtx.drawImage(offScreenCanvas, col * CellSize, row * CellSize, CellSize, CellSize);
@@ -394,7 +424,7 @@ function drawBoard(board) {
             
                 // Apply filter to the off-screen canvas
                 offScreenCtx.filter = 'hue-rotate(320deg)';
-                offScreenCtx.drawImage(red, 0, 0, CellSize, CellSize);
+                offScreenCtx.drawImage(red, 0, 0, CellSize*0.9, CellSize*0.9);
             
                 // Draw the filtered image onto the main canvas
                 foregroundCtx.drawImage(offScreenCanvas, col * CellSize, row * CellSize, CellSize, CellSize);

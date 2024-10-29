@@ -5,6 +5,7 @@
     <title>EXML</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .canvas-layer {
@@ -21,6 +22,7 @@
         <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
     </div>
     <div class="gameover" id="gameover">
+        <i class="fas fa-times close-icon" id="close-icon"></i>
         <div class="over-header">
             <h1>
                 Game Over
@@ -41,8 +43,8 @@
                 </span>
             </div>
             <div class="Score row ">
-                <span>
-                    Score
+                <span >
+                    Player Score
                 </span>
                 <span id="score" class="blue">
                     0
@@ -160,13 +162,13 @@
                         End Game
                     </button>
                 </div>
-                <div class="btnrow">
+                <div class="btnrow" class="input">
                     <input type="text" id="token-input" placeholder="enter token" class="inp">
                     <button class="token btn" id="save-token">
                         Submit Token</button>
                 </div>
                 
-                <div class="btnrow">
+                <div class="btnrow" class="input">
                    
     
                      

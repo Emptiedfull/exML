@@ -1,6 +1,6 @@
 import socketio
 import requests
-
+import time
 import os
 
 link = "http://127.0.0.1:5000"
@@ -16,7 +16,7 @@ def connect():
     global connected
     connected = True
     print("Connected to server")
-    socketio.emit('request')
+    sio.emit('request')
 
 @sio.event
 def disconnect():
@@ -47,8 +47,9 @@ def handle_server_message(data):
    
 
 def process(board,points):
-    print('process')
+   
     move = [0,0,0,1]
+    time.sleep(5)
     #create model here
     send_move(move)
 

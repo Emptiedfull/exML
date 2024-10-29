@@ -201,6 +201,7 @@ body{
 .gameover{
     
     display: flex;
+
     flex-direction: column;
 }
 
@@ -283,4 +284,12 @@ body{
     .controls{
         flex-direction: column;
     }
+}
+
+#close-icon{
+     position: absolute;
+            top: 10%;
+            right: 10%;
+            font-size: 24px;
+            cursor: pointer;
 }

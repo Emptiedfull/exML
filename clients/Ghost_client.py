@@ -1,6 +1,7 @@
 import socketio
 import requests
 import os
+import time 
 
 link = "http://127.0.0.1:5000"
 
@@ -32,7 +33,7 @@ def reconnect():
 
 @sio.on('board')
 def handle_server_message(data):
-    print(data[0])
+   
     if not connected:
         print("Not connected yet,ignoring message")
         return
@@ -47,7 +48,7 @@ def reset():
 
 def process(board,points):
     move = [[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]]
-    
+    time.sleep(5)
     send_move(move)
 
 def send_move(move):

@@ -49,6 +49,9 @@ ghost_move_docked = False
 player_connected = False
 ghost_connected = False
 
+player_id = None
+ghost_id = None
+
 player_name = None
 ghost_name = None
 
@@ -219,6 +222,8 @@ def handlemove(obj,move):
         print("ghost move recieved")
     
     if player_move_docked and ghost_move_docked:
+       
+
         player_timestamp,ghost_timestamp = time.time(),time.time()
         moves += 1
         player_move_docked = False
@@ -228,14 +233,34 @@ def handlemove(obj,move):
         socketio.emit('undock')
         socketio.emit('board', [board.get_board(),player.points])
         if player_status =="death" or status == "death":
+            player_time = round(player_time, 3)
+            ghost_time = round(ghost_time, 3)
             socketio.emit('game-over',{'winner':'ghost','timestamps':[player_time,ghost_time],'moves':moves})
+            socketio.emit('reset',to=player_id)
+            socketio.emit('reset',to=ghost_id)
+            socketio.emit('score',scoring(player.points,[player_time,ghost_time],False))
             print('game over')
         elif board.food_left() == 0:
+            player_time = round(player_time, 3)
+            ghost_time = round(ghost_time, 3)
+            socketio.emit('reset',to=player_id)
+            socketio.emit('reset',to=ghost_id)
             socketio.emit('game-over',{'winner':'player','timestamps':[player_time,ghost_time],'moves':moves})
+            socketio.emit('score',scoring(player.points,[player_time,ghost_time],True))
             print('game over')
         print(player_time,ghost_time)
     
      
+def scoring(points,timestamps,board_clear):
+    player_time,ghost_time = timestamps
+    total = 0
+
+    if board_clear:
+        total += 100
+    total += points
+    total += player_time - ghost_time
+    
+    return round(total,3)
 
 
 @app.route('/')
@@ -364,7 +389,7 @@ def handle_connect():
             player_connected = True
             player_name = name
             socketio.emit('player-connected',name)
-
+            player_id = request.sid
             connected_clients.append(request.sid)
             player_timestamp = time.time()
             socketio.emit('board', [board.get_board(), player.points])
@@ -372,7 +397,7 @@ def handle_connect():
         elif token == ghost_token:
             if ghost_connected == True:
                 raise ConnectionRefusedError('ghost already connected')
-            
+            ghost_id = request.sid
             ghost_connected = True
             ghost_name = name
             socketio.emit('ghost-connected',name)

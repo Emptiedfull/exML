@@ -32,7 +32,7 @@ def remove_top():
 
 def start_top_token_timer():
     global token_timer
-    token_timer = threading.Timer(20,remove_top)
+    token_timer = threading.Timer(1200,remove_top)
     token_timer.start()
 
 def add_entry(email):
