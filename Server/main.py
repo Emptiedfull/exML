@@ -8,7 +8,7 @@ import random
 import string
 import time
 import argparse 
-from tokens import get_entry,add_entry,remove_entry
+from tokens import get_entry,remove_entry
 
 player_timestamp = None
 ghost_timestamp = None

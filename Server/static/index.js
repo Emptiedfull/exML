@@ -188,10 +188,10 @@ document.addEventListener('DOMContentLoaded', function () {
     tokenInput = document.getElementById('token-input')
     
 
-    saveTokenButton = document.getElementById('save-token');
+    saveTokenButton = document.getElementById('enter-queue');
     saveTokenButton.addEventListener('click', function () {
         var tokenInput = document.getElementById('token-input').value;
-       
+        enterToken(tokenInput);
         setToken(tokenInput);
         check_token(tokenInput)
         
@@ -202,13 +202,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     emailButton.addEventListener('click',()=>{
         email = emailInput.value
+
+      
         
         if (!validateEmail(email)){
             queue.innerHTML = 'Invalid Email'
             return console.log("invalid email")
         } 
         queue.innerHTML = "Sending Email..."
-        add_token(email)
+        getToken(email)
     })
 
 
@@ -220,31 +222,51 @@ const validateEmail = (email) => {
     return regex.test(email);
 }
 
-const add_token = (email)=>{
-    console.log(email)
-    fetch(`/token/add`,{
+const getToken = (email) => {
+    fetch('/token/getToken',{
         method:"POST",
         headers:{
             'Content-Type':"application/json"
         },
         body: JSON.stringify({email:email})
+
+    }).then(response=>{
+        return response.json();
+    }).then(data=>{
+        if (data.error){
+            return queue.innerHTML = data.error
+        }
+        if (data.status == "success"){
+            return queue.innerHTML = "Your queue token has been sent to your email"
+        }
+    })
+}
+
+const enterToken = (token) => {
+    fetch('/token/enterQueue',{
+        method:"POST",
+        headers:{
+            'Content-Type':"application/json"
+        },
+        body: JSON.stringify({token:token})
     }).then(response=>{
         if (!response.ok) {
-
+            return queue.innerHTML = 'Invalid Token'
         }
         return response.json();
     }).then(data=>{
-       if (data.error){
-        return queue.innerHTML = data.error
-       }
-       if (data.status == "success"){
-        return queue.innerHTML = "Your queue token has been sent to your email"
-       }
-        
+        if (data.error){
+            return queue.innerHTML = data.error
+        }
+        if (data.status == "success"){
+            return queue.innerHTML = "You have been added to the queue"
+        }
     }).catch(e=>{
         console.log(console.dire(e))
     })
 }
+
+
 
 const check_token = (token) => {
     fetch(`/token/get?token=${encodeURIComponent(token)}`,{

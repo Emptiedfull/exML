@@ -1,23 +1,36 @@
 from flask import blueprints
 import flask
-from tokens import add_entry,remove_entry,get_entry,get_all
+from tokens import add_entry,remove_entry,get_entry,get_all,enter_queue,get_token
 
 
 token_handler = blueprints.Blueprint('token_handler', __name__)
 
-@token_handler.route('/add',methods=['POST'])
-def add_token():
+
+
+
+@token_handler.route('/getToken',methods=['POST'])
+def getTtoken():
     email = flask.request.get_json()
-    print(email.get('email'))
+  
     if email == None:
         return flask.jsonify({"error":"Missing email"}),400
-    status = add_entry(email.get('email'))
-    if status == "failed":
-        print("email in queue")
-        return flask.jsonify({"error":"Email already in queue"}),400
+    status = get_token(email.get('email'))
+    if status == "Token already sent":
+        return flask.jsonify({"error":"Token already sent"}),400
     if status == "invalid email":
-        return flask.jsonify({"error":"Invalid email"})
-    print(status)
+        return flask.jsonify({"error":"Invalid email"}),400
+    return flask.jsonify({"status":status})
+
+@token_handler.route('/enterQueue',methods=['POST'])
+def enterQueue():
+    token = flask.request.get_json()
+    if token == None:
+        return flask.jsonify({"error":"Missing token"}),400
+    status = enter_queue(token.get('token'))
+    if status == "Token already in queue":
+        return flask.jsonify({"error":"Token already in queue"}),400
+    if status == "Token not found":
+        return flask.jsonify({"error":"Token not found"}),400
     return flask.jsonify({"status":status})
 
     

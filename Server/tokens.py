@@ -10,12 +10,54 @@ queue_lock = threading.Lock()
 
 link = "http://localhost:5000"
 
+tokens = []
+
+def get_token(email):
+    print(email)
+    with queue_lock:
+        for entry in token_queue:
+            if entry["email"] == email:
+                return "Email already in queue"
+    for token in tokens: 
+        if token["email"] == email:
+            return "Token already sent"
+    token = gen_token()
+    mail_status = sendEmail(token,email)
+    if mail_status == "invalid email":
+        return "invalid email"
+    
+  
+    tokens.append({"email":email,"token":token})
+    return "success"
+
+
+def enter_queue(token):
+    with queue_lock:
+        for entry in token_queue:
+            if entry["token"] == token:
+                return "Token already in queue"
+        for entry in tokens:
+            if entry["token"] == token:
+                token_queue.append(entry)
+                tokens.remove(entry)
+
+                if len(token_queue) == 1:
+                    start_top_token_timer()
+                return "success"
+        return "Token not found"
+    
+
+
+
 token_timer = None
 
 def gen_token(length=16):
     characters = string.ascii_letters + string.digits
     token = ''.join(secrets.choice(characters) for _ in range(length))
     return token
+
+
+
 
 
 def remove_top():
@@ -44,17 +86,9 @@ def add_entry(email):
                 return "failed"
         else:
             token = gen_token()
-            mail_status  = sendEmail(token,email)
-            if mail_status == "invalid email":
-                return "invalid email"
+    
                 
-            token_queue.append({"token":token,"email":email})
-            
-            
-            print("Added token to queue:",token)
-
-            if len(token_queue) == 1:
-                start_top_token_timer()
+        
            
             return "success"
 
