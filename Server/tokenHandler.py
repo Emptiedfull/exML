@@ -1,6 +1,6 @@
 from flask import blueprints
 import flask
-from tokens import add_entry,remove_entry,get_entry,get_all,enter_queue,get_token
+from tokens import get_entry,get_all,enter_queue,get_token
 
 
 token_handler = blueprints.Blueprint('token_handler', __name__)
@@ -34,9 +34,7 @@ def enterQueue():
     return flask.jsonify({"status":status})
 
     
-@token_handler.route('/')
-def hi():
-    return "hi"
+
 
 @token_handler.route('/queue',methods=['GET'])
 def queue():
@@ -46,7 +44,7 @@ def queue():
 def get():
    
     token = flask.request.args.get('token')
-    print("haha",token)
+    
     if token == None:
         return flask.jsonify({"error":"Missing token"}),400
     status = get_entry(token)

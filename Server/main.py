@@ -96,7 +96,7 @@ def initialize():
     
 
 board = Board()
-print(board.food_left())
+
 positions = board.get_positions()
 
 
@@ -248,7 +248,7 @@ def handlemove(obj,move):
             socketio.emit('game-over',{'winner':'player','timestamps':[player_time,ghost_time],'moves':moves})
             socketio.emit('score',scoring(player.points,[player_time,ghost_time],True))
             print('game over')
-        print(player_time,ghost_time)
+      
     
      
 def scoring(points,timestamps,board_clear):
@@ -349,7 +349,7 @@ def handle_connect():
         if request.headers.get('Authorization') == "Bearer null":
             print('no token')
             socketio.emit("position",{"position":"observer"},to=request.sid)
-        print(request.headers.get('Authorization'))
+       
         try:
             token = request.headers.get('Authorization').split(' ')[1]
             token_entry = get_entry(token)
@@ -369,8 +369,7 @@ def handle_connect():
                 socketio.emit("position",{"position":"player"},to=request.sid)
                 socketio.emit('token',[player_token,ghost_token],to=request.sid)
                 display()
-        print(token_entry)
-        
+    
 
 
 

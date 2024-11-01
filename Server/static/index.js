@@ -367,16 +367,18 @@ function drawBoard(board) {
     }else{
         var CellSize = (window.innerWidth / board[0].length)*90/100
         var x = board[0].length * CellSize
-    var y = board.length * CellSizew
+    var y = board.length * CellSize
     }
    
     
 
     gameboard.style.width = x + 'px'
     gameboard.style.height = y + 'px'
-   
-    console.log(x, y)
-    setCanvasDimensions(x, y)
+
+
+    console.log('Gameboard clientWidth:', gameboard.clientWidth, 'clientHeight:', gameboard.clientHeight);
+    console.log('Gameboard offsetWidth:', gameboard.offsetWidth, 'offsetHeight:', gameboard.offsetHeight);
+    setCanvasDimensions(gameboard.clientWidth,gameboard.clientHeight )
 
     BackgroundCtx.clearRect(0, 0, x, y);
     wallsCtx.clearRect(0, 0, x, y);
@@ -395,7 +397,7 @@ function drawBoard(board) {
             }
 
             if (cell == "#") {
-                wallsCtx.fillStyle = 'black';
+                wallsCtx.fillStyle = 'darkblue';
                 wallsCtx.fillRect(col * CellSize, row * CellSize, CellSize, CellSize);
             }
 

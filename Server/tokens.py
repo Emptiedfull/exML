@@ -28,7 +28,17 @@ def get_token(email):
     
   
     tokens.append({"email":email,"token":token})
+
+    expiry = threading.Timer(600,expire_token,args=(email,token))
+    expiry.start()
+
     return "success"
+
+def expire_token(email,token):
+    global tokens
+    print(email,token)
+    tokens = [entry for entry in tokens if entry["email"] != email and entry["token"] != token]
+    print("Expired token for email:",email)
 
 
 def enter_queue(token):
@@ -66,7 +76,7 @@ def remove_top():
     with queue_lock:
         if token_queue:
             token_queue.popleft()
-            requests.post("http://127.0.0.1:5000/token-expire")
+            requests.post(f'{link}/token-expire')
             print("Removed top token from queue")
             token_timer = None
             if token_queue:
