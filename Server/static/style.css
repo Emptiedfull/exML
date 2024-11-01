@@ -1,42 +1,46 @@
-:root{
+:root {
     --main:#2977F5;
     --black: #000000;
 }
 
-.blue{
+* {
+    box-sizing: border-box;
+
+    transition-property: background;
+    transition-delay: 0ms;
+    transition-duration: 500ms;
+    transition-timing-function: ease-in-out;
+    scroll-behavior: smooth;
+}
+
+.blue {
     color: var(--main);
 }
 
-
-
-body{
+body {
     font-family: 'Trebuchet MS';
     padding: 2.2%;
     display: flex;
     flex-direction: column;
-
-    
-   
+    overflow-x: hidden'
 }
 
-#queue-status{
+#queue-status {
     font-size: 2.7vmin;
+    color: #434343;
 }
 
-.logo{
+.logo {
     width: 150px;
     height: auto;
 }
 
-.gamearea{
+.gamearea {
     display: none;
     display: flex;
     gap: 2rem;
     margin-top: 2%;
-
-    ;
 }
-
 
 .gamearea::before {
     content: '';
@@ -52,27 +56,20 @@ body{
     transition: opacity 0.3s ease;
 }
 
-
-
 .gamearea.overlay-active::before {
     opacity: 1; /* Show the overlay */
 }
 
-
-.gameboard{
+.gameboard {
     position: relative;
     display: inline-block;
     box-sizing: border-box;
-    
     padding: 0;
     margin: 0;
-    
     background-color:black;
-
-
 }
 
-canvas#gameboard {
+canvas #gameboard {
     width: 800px;
     height: 600px;
     box-sizing: border-box;
@@ -83,38 +80,40 @@ canvas#gameboard {
 }
 
 .gamestatus{
-    
-    
-   
     display: flex;
     flex-direction: column;
-  
 }
 
-.title{
+.title {
     font-size: 5vmin;
     font-weight: bolder;
     color: var(--main);
 }
-.sub-title{
+
+.sub-title {
     font-size: 4vmin;
     color: var(--black);
     font-weight: bolder;
+    margin-bottom: 0.5rem;
 }
-#player-points{
+
+#player-points {
     font-size:5vmin
 }
 
-.points{
-    
+.points {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-
+    justify-content: space-between;
+    padding-right: 8%;
 }
 
-.participants{
+.contian {
+    margin-top: 1rem;
     padding-right: 8%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .sub-header{
@@ -122,7 +121,6 @@ canvas#gameboard {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-   
 }
 
 .dropdown{
@@ -138,11 +136,9 @@ canvas#gameboard {
     position: absolute;
     top: 0;
     left: 0;
-
 }
 
-
-
+/* Status Group */
 
 .name{
     display: flex;
@@ -151,25 +147,21 @@ canvas#gameboard {
     font-weight: 700;
     margin-bottom: 2%;
 }
+
 .namevar{
     color: var(--main);
 }
 
 .collapsible {
-   
     cursor: pointer;
-  
 }
 
 .coll-content {
-    
-   
     display: none;
-  
     transition: max-height 0.3s ease-out;
 }
 
-.controls{
+.controls {
     margin-top: 2rem;
     display: flex;
     width: 100%;
@@ -177,28 +169,13 @@ canvas#gameboard {
     gap: 1rem
 }
 
-.btnrow{
-  
+.btnrow {
     display: flex;
     flex: 1 1 auto;
     height: 2.5rem;
-    
-  
 }
 
-.btnrow button{
-    font-size: 2.2vmin;
-    font-weight: 700;
-    padding: 0.5rem;
-
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: 0.3s;
-
-}
-
-.btnrow input{
+.btnrow button {
     font-size: 2.2vmin;
     font-weight: 700;
     padding: 0.5rem;
@@ -208,7 +185,17 @@ canvas#gameboard {
     transition: 0.3s;
 }
 
-
+.btnrow input {
+    font-size: 2.2vmin;
+    font-weight: 500;
+    padding: 0.5rem;
+    border: 2px solid #2977F5;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border-right: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
 .gameover {
     opacity: 0;
@@ -224,21 +211,18 @@ canvas#gameboard {
     border-radius: 15px;
 }
 
-.gameover{
-    
+.gameover {
     display: flex;
-
     flex-direction: column;
 }
 
-.over-header{
+.over-header {
     padding-top: 3%;
-    ;
     justify-self: center;
     align-self: center;
 }
 
-.over-header h1{
+.over-header h1 {
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -247,75 +231,65 @@ canvas#gameboard {
     margin-bottom: 2%;
 }
 
-.over-header span{
+.over-header span {
     color:black;
     align-self: center;
     margin-top: 0.5%;
     font-size: 3vmin;
 }
 
-.ScoreBoard{
-    
-
+.ScoreBoard {
     margin-top: 8%;
     align-self: center;
     width: 50%;
-    
 }
 
-.row{
+.row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 2%;
     font-weight: 600;
-    }
+}
 
-.timestamps{
-    
-
+.timestamps {
     margin-top: 2%;
     align-self: center;
     width: 50%;
-    
 }
 
-.timestamps h1{
+.timestamps h1 {
     margin-left: -10%;
     font-size: 3vmin;
 }
 
-
-
-.available{
+.available {
     display: block;
 }
-.unavailable{
+
+.unavailable {
     display: none;
 }
 
-
-
-@media(max-aspect-ratio: 1/1){
-    .gamearea{
+@media (max-width: 1220px){
+    .gamearea {
         flex-direction: column;
     }
 
-    .gamestatus{
+    .gamestatus {
         margin-top: 2rem;
         width: 98%;
         margin-left: 0;
-      
     }
 
-    .controls{
+    .controls {
         flex-direction: column;
     }
 }
 
-#close-icon{
-     position: absolute;
-            top: 10%;
-            right: 10%;
-            font-size: 24px;
-            cursor: pointer;
+#close-icon {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    font-size: 24px;
+    cursor: pointer;
 }
