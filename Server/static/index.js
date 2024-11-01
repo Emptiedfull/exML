@@ -6,8 +6,7 @@ function setToken(token) {
 
 
 function initializeSocket() {
-    console.log('Initializing socket connection');
-    console.log(localStorage.getItem('token'))
+   
     return io({
         extraHeaders: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -42,13 +41,10 @@ function setupSocketHandlers() {
         ghost.innerHTML = name
     })
     socket.on('token-refresh',()=>{
-        console.log('token refresh')
+       
         location.reload()
     })
 
-    socket.on('busy', () => {
-        window.location.href = '/busy'
-    })
 
     socket.on('playerdocked', () => {
         player_dock.innerHTML = 'Docked'
@@ -70,12 +66,9 @@ function setupSocketHandlers() {
 
     })
 
-    socket.on("spectator", () => {
-        controls = document.getElementById('controls')
-        controls.innerHTML = ''
-    })
+   
 
-    socket.on('')
+
     socket.on('game-over', ({ winner, timestamps }) => {
 
         winnerdisplay = document.getElementById('winner')
@@ -96,13 +89,12 @@ function setupSocketHandlers() {
         player_timestamp.innerHTML = timestamps[0]
         ghost_timestamp.innerHTML = timestamps[1]
         
-        console.log(timestamps)
-
+       
     })
     socket.on('score',(score)=>{
         scoreArea  = document.getElementById('score')
         scoreArea.innerHTML = score
-        console.log(score)
+  
 
     })
 }
@@ -165,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var moves_content = document.getElementById('moves-content')
 
     moves_coll.addEventListener('click', () => {
+       
         if (moves_content.style.display === 'block') {
             moves_content.style.display = 'none'
             moves_content.style.maxHeight = 0
@@ -172,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
             moves_content.style.display = 'block'
             moves_content.style.maxHeight = moves_content.scrollHeight + 'px'
         }
+        
     })
 
     var close = document.getElementById('close-icon')
@@ -354,10 +348,7 @@ function drawBoard(board) {
     gameboard = document.getElementById('gameboard')
     gamestatus = document.getElementById('gamestatus')
 
-    console.log(window.innerWidth, window.innerHeight)
-    console.log(board[0].length, board.length)
-
-
+    
 
     if (window.innerWidth > window.innerHeight) {
         var CellSize = (window.innerHeight / board.length)*70/100
@@ -375,9 +366,6 @@ function drawBoard(board) {
     gameboard.style.width = x + 'px'
     gameboard.style.height = y + 'px'
 
-
-    console.log('Gameboard clientWidth:', gameboard.clientWidth, 'clientHeight:', gameboard.clientHeight);
-    console.log('Gameboard offsetWidth:', gameboard.offsetWidth, 'offsetHeight:', gameboard.offsetHeight);
     setCanvasDimensions(gameboard.clientWidth,gameboard.clientHeight )
 
     BackgroundCtx.clearRect(0, 0, x, y);
@@ -390,7 +378,7 @@ function drawBoard(board) {
             try {
                 cell = board[row][col]
             } catch {
-                console.log(row, col)
+               
                 cell = board[row][col]
 
                 continue
