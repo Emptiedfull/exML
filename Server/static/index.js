@@ -46,9 +46,6 @@ function setupSocketHandlers() {
         location.reload()
     })
 
-    socket.on('busy', () => {
-        window.location.href = '/busy'
-    })
 
     socket.on('playerdocked', () => {
         player_dock.innerHTML = 'Docked'
@@ -70,12 +67,9 @@ function setupSocketHandlers() {
 
     })
 
-    socket.on("spectator", () => {
-        controls = document.getElementById('controls')
-        controls.innerHTML = ''
-    })
+   
 
-    socket.on('')
+
     socket.on('game-over', ({ winner, timestamps }) => {
 
         winnerdisplay = document.getElementById('winner')
@@ -165,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var moves_content = document.getElementById('moves-content')
 
     moves_coll.addEventListener('click', () => {
+       
         if (moves_content.style.display === 'block') {
             moves_content.style.display = 'none'
             moves_content.style.maxHeight = 0
@@ -172,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
             moves_content.style.display = 'block'
             moves_content.style.maxHeight = moves_content.scrollHeight + 'px'
         }
+        
     })
 
     var close = document.getElementById('close-icon')
