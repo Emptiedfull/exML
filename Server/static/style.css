@@ -72,15 +72,7 @@ body{
 
 }
 
-canvas#gameboard {
-    width: 800px;
-    height: 600px;
-    box-sizing: border-box;
-    display: block;
-    /* Remove any padding or margin if present */
-    padding: 0;
-    margin: 0;
-}
+s
 
 .gamestatus{
     
