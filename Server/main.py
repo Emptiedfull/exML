@@ -339,7 +339,7 @@ def handle_connect():
     
    
     origin = request.headers.get('Referer')
-    server =  'http://127.0.0.1:5000/'
+   
     socketio.emit('board', [board.get_board(), player.points])
     if origin:
         id = request.sid
@@ -421,9 +421,10 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=5000, help='Port to run the server on')
     args = parser.parse_args()
 
+
     extra_files = [
         os.path.join(os.getcwd(), 'static', 'index.js'),
         os.path.join(os.getcwd(), 'templates', 'index.html')
     ]
-    socketio.run(app,port=args.port,debug=True, extra_files=extra_files) 
+    socketio.run(app,port=args.port,debug=True, extra_files=extra_files,host='0.0.0.0') 
 
