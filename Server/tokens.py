@@ -41,6 +41,9 @@ def expire_token(email,token):
     print("Expired token for email:",email)
 
 
+def get_all_assigned():
+    return tokens
+
 def enter_queue(token):
     with queue_lock:
         for entry in token_queue:

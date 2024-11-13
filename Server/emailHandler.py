@@ -4,9 +4,9 @@ from email.mime.multipart import MIMEMultipart
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = "587"
-SMTP_USERNAME  = "atharavagarwal14@gmail.com"
-SMTP_PASSWORD = "wgss sexj oytf adzq"
-EMAIL_FROM = "atharavagarwal14@gmail.com"
+SMTP_USERNAME  = ""
+SMTP_PASSWORD = ""
+EMAIL_FROM = ""
 
 
 

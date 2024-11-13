@@ -18,7 +18,7 @@ boardtypes = [
         "######.##          ##.######",
         "######.## ###  ### ##.######",
         "######.## #  b   # ##.######",
-        " p     ##   c  d   ##       ",
+        " p c   ##      d   ##       ",
         "######.## #   a  # ##.######",
         "######.## ###  ### ##.######",
         "######.##          ##.######",
@@ -88,9 +88,11 @@ class Player:
                
                 
         if move == "right":
+
+
             if board[self.x,self.y+1] in "abcd":
                      return 'death'
-            elif board[self.x,self.y+1] != '#':
+            elif board[self.x,(self.y+1)%27] != '#':
                 if board[self.x,self.y+1] == '.':
                     self.points += 1 
                 board[self.x,self.y] = ' '

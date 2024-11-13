@@ -1,6 +1,6 @@
 from flask import blueprints
 import flask
-from tokens import get_entry,get_all,enter_queue,get_token
+from tokens import get_entry,get_all,enter_queue,get_token,get_all_assigned
 
 
 token_handler = blueprints.Blueprint('token_handler', __name__)
@@ -38,7 +38,7 @@ def enterQueue():
 
 @token_handler.route('/queue',methods=['GET'])
 def queue():
-    return flask.jsonify({"queue":get_all()})
+    return flask.jsonify({"queue":get_all(),"assigned":get_all_assigned()})
 
 @token_handler.route('/get',methods=['GET'])
 def get():

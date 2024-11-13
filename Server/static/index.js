@@ -354,7 +354,7 @@ function drawBoard(board) {
         var CellSize = (window.innerHeight / board.length)*70/100
         var x = board[0].length * CellSize
     var y = board.length * CellSize
-         gamestatus.style.width = (window.innerWidth - x-100) + 'px'
+         gamestatus.style.width = (window.innerWidth - x)*90/100 + 'px'
     }else{
         var CellSize = (window.innerWidth / board[0].length)*90/100
         var x = board[0].length * CellSize

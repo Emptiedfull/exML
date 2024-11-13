@@ -82,16 +82,17 @@ canvas #gameboard {
 .gamestatus{
     display: flex;
     flex-direction: column;
+    height: 80%;
 }
 
 .title {
-    font-size: 5vmin;
+    font-size: 4vmin;
     font-weight: bolder;
     color: var(--main);
 }
 
 .sub-title {
-    font-size: 4vmin;
+    font-size: 3vmin;
     color: var(--black);
     font-weight: bolder;
     margin-bottom: 0.5rem;
